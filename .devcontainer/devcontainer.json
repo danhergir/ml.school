@@ -1,0 +1,40 @@
+{
+    "name": "mlschool",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "forwardPorts": [
+        5000, 8080, 8324, 8334
+    ],
+    "hostRequirements": {
+        "memory": "5gb"
+    },
+    "containerEnv": {
+        // We need to set the PYTHONPATH environment variable to the /src directory
+        // so Python can find the project modules.
+        "PYTHONPATH": "/workspaces/ml.school/src"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-toolsai.jupyter",
+                "charliermarsh.ruff",
+                "tideily.mlschool"
+            ]
+        }
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+            "moby": true,
+            "installDockerBuildx": true,
+            "installDockerComposeSwitch": true,
+            "version": "latest",
+            "dockerDashComposeVersion": "none"
+        }
+    },
+    "runArgs": [
+        "--env-file",
+        "env.shared"
+    ]
+}
