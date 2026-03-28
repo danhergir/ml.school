@@ -4,6 +4,7 @@ set positional-arguments
 KERAS_BACKEND := env("KERAS_BACKEND", "tensorflow")
 MLFLOW_PORT := env("MLFLOW_PORT", "5001")
 MLFLOW_TRACKING_URI := env("MLFLOW_TRACKING_URI", "http://127.0.0.1:5001")
+MLFLOW_SQLITE_PORT := env("MLFLOW_SQLITE_PORT", "5500")
 ENDPOINT_NAME := env("ENDPOINT_NAME", "penguins")
 BUCKET := env("BUCKET", "")
 AWS_REGION := env("AWS_REGION", "us-east-1")
@@ -43,6 +44,32 @@ test:
     uv run -- python src/scripts/log_mlflow_experiment.py \
         --tracking-uri {{MLFLOW_TRACKING_URI}} \
         --experiment-name {{experiment}}
+
+# Run MLflow with a SQLite backend store and filesystem artifact root
+[group('setup')]
+@mlflow-sqlite:
+    mkdir -p data/mlflow-assignment/artifacts
+    uv run -- mlflow server \
+        --host 127.0.0.1 \
+        --port {{MLFLOW_SQLITE_PORT}} \
+        --backend-store-uri sqlite:///data/mlflow-assignment/mlflow.db \
+        --default-artifact-root file://$(pwd)/data/mlflow-assignment/artifacts \
+        --allowed-hosts '*' \
+        --cors-allowed-origins '*'
+
+# Log a small example run to the SQLite-backed MLflow server
+[group('setup')]
+@mlflow-log-sqlite-example experiment='assignment-sqlite-experiment':
+    uv run -- python src/scripts/log_mlflow_experiment.py \
+        --tracking-uri http://127.0.0.1:{{MLFLOW_SQLITE_PORT}} \
+        --experiment-name {{experiment}} \
+        --run-name sqlite-backend-example
+
+# Show the local SQLite database and artifact files created by MLflow
+[group('setup')]
+@mlflow-sqlite-files:
+    ls -lh data/mlflow-assignment/mlflow.db
+    find data/mlflow-assignment/artifacts -type f | sort
 
 # Set up required environment variables
 [group('setup')]
