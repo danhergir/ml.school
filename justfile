@@ -2,7 +2,8 @@ set dotenv-load
 set positional-arguments
 
 KERAS_BACKEND := env("KERAS_BACKEND", "tensorflow")
-MLFLOW_TRACKING_URI := env("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000")
+MLFLOW_PORT := env("MLFLOW_PORT", "5001")
+MLFLOW_TRACKING_URI := env("MLFLOW_TRACKING_URI", "http://127.0.0.1:5001")
 ENDPOINT_NAME := env("ENDPOINT_NAME", "penguins")
 BUCKET := env("BUCKET", "")
 AWS_REGION := env("AWS_REGION", "us-east-1")
@@ -30,7 +31,18 @@ test:
 # Run MLflow server
 [group('setup')]
 @mlflow:
-    uv run -- mlflow server --host 127.0.0.1 --port 5000
+    uv run -- mlflow server \
+        --host 0.0.0.0 \
+        --port {{MLFLOW_PORT}} \
+        --allowed-hosts '*' \
+        --cors-allowed-origins '*'
+
+# Log a small example run to the local MLflow server
+[group('setup')]
+@mlflow-log-example experiment='assignment-local-experiment':
+    uv run -- python src/scripts/log_mlflow_experiment.py \
+        --tracking-uri {{MLFLOW_TRACKING_URI}} \
+        --experiment-name {{experiment}}
 
 # Set up required environment variables
 [group('setup')]
@@ -206,5 +218,3 @@ test:
     METAFLOW_PROFILE=production uv run src/pipelines/deployment.py \
         step-functions trigger \
         --backend backend.Sagemaker
-
-

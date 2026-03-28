@@ -143,7 +143,7 @@ def parse_project_configuration(x):
     # the value of the `MLFLOW_TRACKING_URI` environment variable.
     if "mlflow_tracking_uri" not in config:
         config["mlflow_tracking_uri"] = os.getenv(
-            "MLFLOW_TRACKING_URI", "http://localhost:5000"
+            "MLFLOW_TRACKING_URI", "http://localhost:5001"
         )
 
     if "backend" not in config:

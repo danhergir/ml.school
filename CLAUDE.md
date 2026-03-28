@@ -98,7 +98,7 @@ uv run src/agents/rag/agent.py
 
 ### MLflow Tracking
 - MLflow is configured for experiment tracking
-- Access the UI at `http://localhost:5000` when running locally
+- Access the UI at `http://127.0.0.1:5001` when running locally, or use the forwarded preview URL for port `5001` in a container/cloud workspace
 - See training pipeline documentation for usage examples
 
 
